@@ -15,10 +15,13 @@ export default function Page() {
     // (защита от двойного вызова эффекта в React StrictMode).
     if (window.__contextTalkStarted) return;
     window.__contextTalkStarted = true;
-    const script = document.createElement('script');
-    script.src = '/contexttalk.js';
-    script.async = false;
-    document.body.appendChild(script);
+    // Сначала загружается TypeScript-ядро (мост window.ContextTalk), затем интерфейс.
+    void import('../lib/client/bridge').then(() => {
+      const script = document.createElement('script');
+      script.src = '/contexttalk.js';
+      script.async = false;
+      document.body.appendChild(script);
+    });
   }, []);
 
   // display: contents — обёртка не влияет на вёрстку.

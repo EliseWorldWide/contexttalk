@@ -118,8 +118,10 @@ export class GeminiProvider implements AIProvider {
     const fresh = new Date(Date.now() + 60 * 1000).toISOString();
     let token: { name?: string };
     try {
+      // Токен одноразовый и короткоживущий. Привязку к модели (liveConnectConstraints) не используем:
+      // она необязательна, а при несовпадении с настройками сессии сервер отклоняет подключение.
       token = await client.authTokens.create({
-        config: { uses: 1, expireTime: expire, newSessionExpireTime: fresh, liveConnectConstraints: { model } },
+        config: { uses: 1, expireTime: expire, newSessionExpireTime: fresh },
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

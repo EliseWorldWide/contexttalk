@@ -67,6 +67,7 @@ X('ea_language_not_selected','Язык речи не входит в выбра�
 X('ea_voice_rejected','Google не принял запись голоса. Перезапишите образец и фразу согласия заново — подряд и на одном микрофоне.','Google rejected the voice recording. Record the sample and the consent phrase again, back to back on the same microphone.','Google 未接受该录音。请在同一麦克风上连续重新录制样本和同意语句。','Google odrzucił nagranie głosu. Nagraj próbkę i zdanie zgody ponownie, jedno po drugim, na tym samym mikrofonie.');
 X('ea_consent_required','Нужно подтвердить согласие на использование голоса.','You need to confirm consent to use the voice.','需要确认同意使用该声音。','Musisz potwierdzić zgodę na użycie głosu.');
 X('ea_other','Не удалось выполнить действие. Повторите попытку.','Something went wrong. Please try again.','操作失败，请重试。','Coś poszło nie tak. Spróbuj ponownie.');
+X('ea_live','Режим Live недоступен, перевод идёт запасным путём (чуть медленнее)','Live mode is unavailable; translation continues via a fallback path (slightly slower)','Live 模式不可用，翻译将通过备用方式进行（稍慢）','Tryb Live jest niedostępny; tłumaczenie działa awaryjnie (nieco wolniej)');
 X('newc','Новая беседа','New conversation','新对话','Nowa rozmowa');
 X('n_newc','Начата новая беседа: контекст очищен','New conversation started: context cleared','已开始新对话：上下文已清空','Rozpoczęto nową rozmowę: kontekst wyczyszczony');
 X('n_ctx_partial','Добавлено как ваш факт; AI не смог разобрать детали',"Added as your fact; the AI couldn't parse the details",'已作为你的事实添加；AI 未能解析细节','Dodano jako Twój fakt; AI nie rozłożyło szczegółów');
@@ -93,14 +94,14 @@ const S={view:'conv',state:'idle',from:store.get('from','ru'),to:store.get('to',
 S.selected=[...new Set([S.from,S.to,...S.selected])].filter(c=>CODES.includes(c));
 const stateText=s=>t('st_'+(s==='interrupted'?'listening':s)).split('|');
 function setState(s,hint){S.state=s;$('#orb').dataset.state=s;const [a,b]=stateText(s);$('#status').textContent=a;$('#hint').textContent=hint??b;if(s!=='error')$('#banner').hidden=true}
-function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2800)}
+function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),6000)}
 const save=()=>store.set('hist3',S.hist);
 const fmt=ts=>new Date(ts).toLocaleString(UI==='zh'?'zh-CN':UI,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 const sp=x=>x==='user'?t('you'):t('them');
 const tline=m=>m.status==='translated'?esc(m.translatedText):m.status==='pending'?'…':`<i>${t('ea_other')}</i>`;
 
 /* ===== Ошибки: понятный текст + повтор ===== */
-function errText(code,msg){const k='ea_'+code;if(D[k])return t(k);if(['denied','nodev','busy','insecure'].includes(code))return t('m_'+code);return t('ea_other')}
+function errText(code,msg){if(code==='live')return t('ea_live')+(msg?' ('+msg+')':'');const k='ea_'+code;if(D[k])return t(k);if(['denied','nodev','busy','insecure'].includes(code))return t('m_'+code);return t('ea_other')}
 function showErr(e){setState('error','');$('#bmsg').textContent=errText(e.code,e.message);const textOnly=e.code==='nodev';
  $('#bretry').textContent=textOnly?t('typeit'):t('retry');
  $('#bretry').onclick=()=>{$('#banner').hidden=true;if(textOnly)openCompose();else if(e.retry)e.retry();else ctl.start()};$('#banner').hidden=false}

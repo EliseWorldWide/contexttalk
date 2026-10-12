@@ -17,15 +17,17 @@ export class LiveTranscriber {
   get isOpen(): boolean { return this.ready && this.ws?.readyState === WebSocket.OPEN; }
 
   async connect(): Promise<void> {
-    const info = await this.api.liveToken();
+    let info;
+    try { info = await this.api.liveToken(); }
+    catch (e) { throw new ApiError('live', `токен: ${(e as ApiError).code ?? 'ошибка'}`); }
     await new Promise<void>((resolve, reject) => {
       let settled = false;
       const done = (err?: Error) => { if (settled) return; settled = true; clearTimeout(timer); err ? reject(err) : resolve(); };
-      const timer = setTimeout(() => { this.close(); done(new ApiError('network', 'Live API connect timeout')); }, 12000);
+      const timer = setTimeout(() => { this.close(); done(new ApiError('live', 'нет ответа за 12 с')); }, 12000);
       const ws = (this.ws = new WebSocket(`${info.wsUrl}?access_token=${encodeURIComponent(info.token)}`));
       ws.onopen = () => ws.send(JSON.stringify(info.setup));
-      ws.onerror = () => done(new ApiError('network', 'Live API connection failed'));
-      ws.onclose = () => { const was = this.ready; this.ready = false; if (!settled) done(new ApiError('network', 'Live API closed')); else if (was) this.onClose(); };
+      ws.onerror = () => done(new ApiError('live', 'ошибка соединения'));
+      ws.onclose = (ev) => { const was = this.ready; this.ready = false; if (!settled) done(new ApiError('live', `закрыто ${ev.code}${ev.reason ? ': ' + ev.reason.slice(0, 120) : ''}`)); else if (was) this.onClose(); };
       ws.onmessage = async (ev) => {
         let raw: string;
         try { raw = typeof ev.data === 'string' ? ev.data : await (ev.data as Blob).text(); } catch { return; }

@@ -190,7 +190,7 @@ export class ConversationController {
     try { await this.player.speak(segs); }
     catch (e) {
       // Ошибка озвучки не блокирует: перевод уже показан текстом.
-      this.ev.notice('tts', e instanceof ApiError ? e.message : 'Не удалось озвучить перевод. Текст перевода показан на экране.');
+      this.ev.notice('tts', (e instanceof ApiError ? `${e.code}${e.detail ? ': ' + e.detail : ''}` : String((e as Error)?.message ?? e)));
     }
     if (run !== this.run) return; // перебили
     this.set(this.idleState());
@@ -220,7 +220,7 @@ export class ConversationController {
     const run = ++this.run;
     this.set('speaking');
     try { await this.player.speak(splitSentences(m.translatedText).map((text) => () => this.api.tts({ text, language: m.targetLanguage, targetRole, speakers }))); }
-    catch (e) { this.ev.notice('tts', e instanceof ApiError ? e.message : 'tts'); }
+    catch (e) { this.ev.notice('tts', (e instanceof ApiError ? `${e.code}${e.detail ? ': ' + e.detail : ''}` : String((e as Error)?.message ?? e))); }
     if (run === this.run) this.set(this.idleState());
   }
 

@@ -116,7 +116,7 @@ const ctl=new CT.ConversationController(engineInit(),{
  level:l=>$('#orb').style.setProperty('--lvl',l),
  partial:x=>{if(S.state==='listening'&&x)$('#hint').textContent=x},
  error:showErr,
- notice:(c,m)=>toast(c==='tts'?t('e_tts'):errText(c,m)),
+ notice:(c,m)=>toast(c==='tts'?t('e_tts')+(m?' ('+m+')':''):errText(c,m)),
  context:()=>store.set('ctx',ctl.engine.state)});
 ctl.setMode(S.mode);
 S.cur=S.hist.find(c=>c.id===ctl.engine.state.conversationId)||null;

@@ -26,7 +26,7 @@ export function liveSetup(model: string): Record<string, unknown> {
   return {
     setup: {
       model: `models/${model}`,
-      responseModalities: ['AUDIO'],
+      generationConfig: { responseModalities: ['AUDIO'] },
       inputAudioTranscription: {},
       systemInstruction: { parts: [{ text: LIVE_SYSTEM_INSTRUCTION }] },
     },

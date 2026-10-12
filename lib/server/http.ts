@@ -29,7 +29,7 @@ export const json = (data: unknown, status = 200): Response =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export function errorResponse(e: unknown): Response {
-  if (e instanceof AIError) return json({ error: { code: e.code, message: USER_MESSAGES[e.code], detail: e.status >= 500 ? undefined : e.message } }, e.status);
+  if (e instanceof AIError) return json({ error: { code: e.code, message: USER_MESSAGES[e.code], detail: e.message.slice(0, 300) } }, e.status);
   console.error('[contexttalk] unexpected error', e instanceof Error ? e.message : e);
   return json({ error: { code: 'upstream', message: USER_MESSAGES.upstream } }, 500);
 }

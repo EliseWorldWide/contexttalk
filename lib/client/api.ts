@@ -3,7 +3,8 @@ import type { ConversationContext, TranslationMode, TranslationResult, SpeakerRo
 export class ApiError extends Error {
   code: string;
   status: number;
-  constructor(code: string, message: string, status = 0) { super(message); this.name = 'ApiError'; this.code = code; this.status = status; }
+  detail?: string;
+  constructor(code: string, message: string, status = 0, detail?: string) { super(message); this.name = 'ApiError'; this.code = code; this.status = status; this.detail = detail; }
 }
 
 const NETWORK_MSG = 'Не удалось подключиться к AI. Проверь интернет-соединение.';
@@ -16,9 +17,9 @@ async function call(path: string, init: RequestInit): Promise<Response> {
     throw new ApiError('network', NETWORK_MSG);
   }
   if (!res.ok) {
-    let code = 'upstream', message = 'AI сейчас недоступен. Повторите через несколько секунд.';
-    try { const j = await res.json(); code = j?.error?.code ?? code; message = j?.error?.message ?? message; } catch { /* not json */ }
-    throw new ApiError(code, message, res.status);
+    let code = 'upstream', message = 'AI сейчас недоступен. Повторите через несколько секунд.', detail: string | undefined;
+    try { const j = await res.json(); code = j?.error?.code ?? code; message = j?.error?.message ?? message; detail = j?.error?.detail; } catch { /* not json */ }
+    throw new ApiError(code, message, res.status, detail);
   }
   return res;
 }
